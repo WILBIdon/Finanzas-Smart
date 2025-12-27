@@ -499,31 +499,55 @@ export default function App() {
                 {activeTab === 'resumen' && <SmartTotals periodo={periodo} bolsa={bolsa} totalIngresos={totalIngresos} totalGastos={totalGastos} totalPatrimonio={totalPatrimonio} obligacionesPendientes={obligacionesPendientes} situacionReal={situacionReal} formatCurrency={formatCurrency} />}
             </main>
 
-            {/* Navegación */}
-            <nav className="bg-white border-t border-gray-200 pb-6 pt-3 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-30 overflow-x-auto">
-                <div className="flex justify-between items-end px-2 sm:px-4 w-full">
-                    <button onClick={() => setActiveTab('ingresos')} className="group flex flex-col items-center flex-1 gap-1">
-                        <div className={`p-2 rounded-2xl transition-all duration-300 ${activeTab === 'ingresos' ? 'bg-green-100 text-green-700 scale-110' : 'text-gray-400'}`}><TrendingUp size={22} strokeWidth={activeTab === 'ingresos' ? 3 : 2} /></div>
-                        <span className={`text-[9px] sm:text-[10px] font-bold ${activeTab === 'ingresos' ? 'text-green-700' : 'text-gray-400'}`}>Ingreso</span>
+            {/* Navegación - Compacta y Colorida */}
+            <nav className="bg-white/95 backdrop-blur-lg border-t border-gray-200 pt-2 pb-[env(safe-area-inset-bottom,12px)] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-30">
+                <div className="flex justify-around items-center px-1 w-full">
+                    {/* Ingreso - Verde */}
+                    <button onClick={() => setActiveTab('ingresos')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'ingresos' ? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg shadow-green-300/50 scale-110' : 'bg-green-50 text-green-500'}`}>
+                            <TrendingUp size={20} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[10px] font-bold ${activeTab === 'ingresos' ? 'text-green-600' : 'text-green-400'}`}>Ingreso</span>
                     </button>
-                    <button onClick={() => setActiveTab('gastos')} className="group flex flex-col items-center flex-1 gap-1">
-                        <div className={`p-2 rounded-2xl transition-all duration-300 ${activeTab === 'gastos' ? 'bg-red-100 text-red-700 scale-110' : 'text-gray-400'}`}><TrendingDown size={22} strokeWidth={activeTab === 'gastos' ? 3 : 2} /></div>
-                        <span className={`text-[9px] sm:text-[10px] font-bold ${activeTab === 'gastos' ? 'text-red-700' : 'text-gray-400'}`}>Gasto</span>
+
+                    {/* Gasto - Rojo */}
+                    <button onClick={() => setActiveTab('gastos')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'gastos' ? 'bg-gradient-to-br from-red-400 to-red-600 text-white shadow-lg shadow-red-300/50 scale-110' : 'bg-red-50 text-red-400'}`}>
+                            <TrendingDown size={20} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[10px] font-bold ${activeTab === 'gastos' ? 'text-red-600' : 'text-red-400'}`}>Gasto</span>
                     </button>
-                    <button onClick={() => setActiveTab('resumen')} className="relative -top-5 mx-1">
-                        <div className="bg-blue-600 text-white p-3 sm:p-4 rounded-3xl shadow-xl shadow-blue-400/50 active:scale-95 transition-transform border-[5px] border-gray-50 flex items-center justify-center"><Brain size={28} strokeWidth={2.5} /></div>
+
+                    {/* Resumen - Azul Central */}
+                    <button onClick={() => setActiveTab('resumen')} className="flex flex-col items-center gap-0.5 py-1 px-2 -mt-4">
+                        <div className={`p-2.5 rounded-2xl transition-all shadow-lg ${activeTab === 'resumen' ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-blue-400/60 scale-110' : 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-300/40'} text-white border-2 border-white`}>
+                            <Brain size={22} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[10px] font-bold ${activeTab === 'resumen' ? 'text-blue-700' : 'text-blue-500'}`}>Resumen</span>
                     </button>
-                    <button onClick={() => setActiveTab('metas')} className="group flex flex-col items-center flex-1 gap-1">
-                        <div className={`p-2 rounded-2xl transition-all duration-300 ${activeTab === 'metas' ? 'bg-cyan-100 text-cyan-700 scale-110' : 'text-gray-400'}`}><Trophy size={22} strokeWidth={activeTab === 'metas' ? 3 : 2} /></div>
-                        <span className={`text-[9px] sm:text-[10px] font-bold ${activeTab === 'metas' ? 'text-cyan-700' : 'text-gray-400'}`}>Ahorro</span>
+
+                    {/* Ahorro - Cyan */}
+                    <button onClick={() => setActiveTab('metas')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'metas' ? 'bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-lg shadow-cyan-300/50 scale-110' : 'bg-cyan-50 text-cyan-500'}`}>
+                            <Trophy size={20} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[10px] font-bold ${activeTab === 'metas' ? 'text-cyan-600' : 'text-cyan-400'}`}>Ahorro</span>
                     </button>
-                    <button onClick={() => setActiveTab('inversiones')} className="group flex flex-col items-center flex-1 gap-1">
-                        <div className={`p-2 rounded-2xl transition-all duration-300 ${activeTab === 'inversiones' ? 'bg-indigo-100 text-indigo-700 scale-110' : 'text-gray-400'}`}><Rocket size={22} strokeWidth={activeTab === 'inversiones' ? 3 : 2} /></div>
-                        <span className={`text-[9px] sm:text-[10px] font-bold ${activeTab === 'inversiones' ? 'text-indigo-700' : 'text-gray-400'}`}>Invest</span>
+
+                    {/* Invest - Indigo */}
+                    <button onClick={() => setActiveTab('inversiones')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'inversiones' ? 'bg-gradient-to-br from-indigo-400 to-indigo-600 text-white shadow-lg shadow-indigo-300/50 scale-110' : 'bg-indigo-50 text-indigo-500'}`}>
+                            <Rocket size={20} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[10px] font-bold ${activeTab === 'inversiones' ? 'text-indigo-600' : 'text-indigo-400'}`}>Invest</span>
                     </button>
-                    <button onClick={() => setActiveTab('presupuesto')} className="group flex flex-col items-center flex-1 gap-1">
-                        <div className={`p-2 rounded-2xl transition-all duration-300 ${activeTab === 'presupuesto' ? 'bg-orange-100 text-orange-700 scale-110' : 'text-gray-400'}`}><Target size={22} strokeWidth={activeTab === 'presupuesto' ? 3 : 2} /></div>
-                        <span className={`text-[9px] sm:text-[10px] font-bold ${activeTab === 'presupuesto' ? 'text-orange-700' : 'text-gray-400'}`}>Fijos</span>
+
+                    {/* Fijos - Naranja */}
+                    <button onClick={() => setActiveTab('presupuesto')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'presupuesto' ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-300/50 scale-110' : 'bg-orange-50 text-orange-500'}`}>
+                            <Target size={20} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[10px] font-bold ${activeTab === 'presupuesto' ? 'text-orange-600' : 'text-orange-400'}`}>Fijos</span>
                     </button>
                 </div>
             </nav>
