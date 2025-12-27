@@ -92,7 +92,7 @@ const ListSection = ({
     };
 
     return (
-        <div className="pb-32 animate-in fade-in zoom-in duration-300">
+        <div className="pb-4 animate-in fade-in zoom-in duration-300">
             {/* Header Sección */}
             <div className={`p-4 sm:p-6 rounded-b-3xl shadow-sm mb-6 ${bgColor} border-b-2 border-${color}-200`}>
                 <div className="flex items-center gap-3 mb-2">
@@ -279,7 +279,7 @@ const ListSection = ({
 
 // --- COMPONENTE EXTRAÍDO: SmartTotals ---
 const SmartTotals = ({ periodo, bolsa, totalIngresos, totalGastos, totalPatrimonio, obligacionesPendientes, situacionReal, formatCurrency }) => (
-    <div className="p-3 sm:p-4 pb-32 space-y-4 sm:space-y-5 animate-in slide-in-from-bottom duration-500">
+    <div className="p-3 sm:p-4 pb-4 space-y-4 sm:space-y-5 animate-in slide-in-from-bottom duration-500">
         {/* BOLSA GIGANTE */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-4 sm:p-6 rounded-[2rem] shadow-xl shadow-blue-200 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
@@ -489,7 +489,61 @@ export default function App() {
                 </div>
             </div>
 
-            <main className="flex-1 overflow-y-auto no-scrollbar">
+            {/* Navegación Flotante Fija - ARRIBA del contenido */}
+            <nav className="bg-white/95 backdrop-blur-lg border-b border-gray-100 py-2 shadow-md z-20 sticky top-[60px] sm:top-[68px]">
+                <div className="flex justify-around items-center px-1 w-full">
+                    {/* Resumen - Azul PRIMERO */}
+                    <button onClick={() => setActiveTab('resumen')} className="flex flex-col items-center gap-0.5 py-1 px-1">
+                        <div className={`p-2 rounded-2xl transition-all shadow-md ${activeTab === 'resumen' ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-blue-400/60 scale-110' : 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-300/40'} text-white`}>
+                            <Brain size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[9px] font-bold ${activeTab === 'resumen' ? 'text-blue-700' : 'text-blue-500'}`}>Resumen</span>
+                    </button>
+
+                    {/* Ingreso - Verde */}
+                    <button onClick={() => setActiveTab('ingresos')} className="flex flex-col items-center gap-0.5 py-1 px-1">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'ingresos' ? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-md shadow-green-300/50' : 'bg-green-100 text-green-600'}`}>
+                            <TrendingUp size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[9px] font-bold ${activeTab === 'ingresos' ? 'text-green-600' : 'text-green-500'}`}>Ingreso</span>
+                    </button>
+
+                    {/* Gasto - Rojo */}
+                    <button onClick={() => setActiveTab('gastos')} className="flex flex-col items-center gap-0.5 py-1 px-1">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'gastos' ? 'bg-gradient-to-br from-red-400 to-red-600 text-white shadow-md shadow-red-300/50' : 'bg-red-100 text-red-500'}`}>
+                            <TrendingDown size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[9px] font-bold ${activeTab === 'gastos' ? 'text-red-600' : 'text-red-500'}`}>Gasto</span>
+                    </button>
+
+                    {/* Ahorro - Cyan */}
+                    <button onClick={() => setActiveTab('metas')} className="flex flex-col items-center gap-0.5 py-1 px-1">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'metas' ? 'bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-md shadow-cyan-300/50' : 'bg-cyan-100 text-cyan-600'}`}>
+                            <Trophy size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[9px] font-bold ${activeTab === 'metas' ? 'text-cyan-600' : 'text-cyan-500'}`}>Ahorro</span>
+                    </button>
+
+                    {/* Invest - Indigo */}
+                    <button onClick={() => setActiveTab('inversiones')} className="flex flex-col items-center gap-0.5 py-1 px-1">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'inversiones' ? 'bg-gradient-to-br from-indigo-400 to-indigo-600 text-white shadow-md shadow-indigo-300/50' : 'bg-indigo-100 text-indigo-600'}`}>
+                            <Rocket size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[9px] font-bold ${activeTab === 'inversiones' ? 'text-indigo-600' : 'text-indigo-500'}`}>Invest</span>
+                    </button>
+
+                    {/* Fijos - Naranja */}
+                    <button onClick={() => setActiveTab('presupuesto')} className="flex flex-col items-center gap-0.5 py-1 px-1">
+                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'presupuesto' ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md shadow-orange-300/50' : 'bg-orange-100 text-orange-600'}`}>
+                            <Target size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className={`text-[9px] font-bold ${activeTab === 'presupuesto' ? 'text-orange-600' : 'text-orange-500'}`}>Fijos</span>
+                    </button>
+                </div>
+            </nav>
+
+            {/* Contenido - Hace scroll debajo de la nav */}
+            <main className="flex-1 overflow-y-auto no-scrollbar pb-4">
                 {activeTab === 'ingresos' && <ListSection title="Ingresos" items={ingresos} setter={setIngresos} color="text-green-600" bgColor="bg-green-50" icon={TrendingUp} {...listSectionProps} />}
                 {activeTab === 'gastos' && <ListSection title="Gastos" items={gastos} setter={setGastos} color="text-red-600" bgColor="bg-red-50" icon={TrendingDown} placeholder="¿Qué pagaste?" {...listSectionProps} />}
                 {activeTab === 'metas' && <ListSection title="Metas Ahorro" items={metas} setter={setMetas} color="text-cyan-600" bgColor="bg-cyan-50" icon={Trophy} placeholder="Nombre de la meta" type="meta" {...listSectionProps} />}
@@ -498,59 +552,6 @@ export default function App() {
                 {activeTab === 'proyectado' && <ListSection title="Deseos" items={proyectado} setter={setProyectado} color="text-purple-600" bgColor="bg-purple-50" icon={Wallet} placeholder="Gasto opcional" {...listSectionProps} />}
                 {activeTab === 'resumen' && <SmartTotals periodo={periodo} bolsa={bolsa} totalIngresos={totalIngresos} totalGastos={totalGastos} totalPatrimonio={totalPatrimonio} obligacionesPendientes={obligacionesPendientes} situacionReal={situacionReal} formatCurrency={formatCurrency} />}
             </main>
-
-            {/* Navegación - Compacta y Colorida */}
-            <nav className="bg-white/95 backdrop-blur-lg border-t border-gray-200 pt-2 pb-[env(safe-area-inset-bottom,12px)] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-30">
-                <div className="flex justify-around items-center px-1 w-full">
-                    {/* Ingreso - Verde */}
-                    <button onClick={() => setActiveTab('ingresos')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
-                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'ingresos' ? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg shadow-green-300/50 scale-110' : 'bg-green-50 text-green-500'}`}>
-                            <TrendingUp size={20} strokeWidth={2.5} />
-                        </div>
-                        <span className={`text-[10px] font-bold ${activeTab === 'ingresos' ? 'text-green-600' : 'text-green-400'}`}>Ingreso</span>
-                    </button>
-
-                    {/* Gasto - Rojo */}
-                    <button onClick={() => setActiveTab('gastos')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
-                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'gastos' ? 'bg-gradient-to-br from-red-400 to-red-600 text-white shadow-lg shadow-red-300/50 scale-110' : 'bg-red-50 text-red-400'}`}>
-                            <TrendingDown size={20} strokeWidth={2.5} />
-                        </div>
-                        <span className={`text-[10px] font-bold ${activeTab === 'gastos' ? 'text-red-600' : 'text-red-400'}`}>Gasto</span>
-                    </button>
-
-                    {/* Resumen - Azul Central */}
-                    <button onClick={() => setActiveTab('resumen')} className="flex flex-col items-center gap-0.5 py-1 px-2 -mt-4">
-                        <div className={`p-2.5 rounded-2xl transition-all shadow-lg ${activeTab === 'resumen' ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-blue-400/60 scale-110' : 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-300/40'} text-white border-2 border-white`}>
-                            <Brain size={22} strokeWidth={2.5} />
-                        </div>
-                        <span className={`text-[10px] font-bold ${activeTab === 'resumen' ? 'text-blue-700' : 'text-blue-500'}`}>Resumen</span>
-                    </button>
-
-                    {/* Ahorro - Cyan */}
-                    <button onClick={() => setActiveTab('metas')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
-                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'metas' ? 'bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-lg shadow-cyan-300/50 scale-110' : 'bg-cyan-50 text-cyan-500'}`}>
-                            <Trophy size={20} strokeWidth={2.5} />
-                        </div>
-                        <span className={`text-[10px] font-bold ${activeTab === 'metas' ? 'text-cyan-600' : 'text-cyan-400'}`}>Ahorro</span>
-                    </button>
-
-                    {/* Invest - Indigo */}
-                    <button onClick={() => setActiveTab('inversiones')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
-                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'inversiones' ? 'bg-gradient-to-br from-indigo-400 to-indigo-600 text-white shadow-lg shadow-indigo-300/50 scale-110' : 'bg-indigo-50 text-indigo-500'}`}>
-                            <Rocket size={20} strokeWidth={2.5} />
-                        </div>
-                        <span className={`text-[10px] font-bold ${activeTab === 'inversiones' ? 'text-indigo-600' : 'text-indigo-400'}`}>Invest</span>
-                    </button>
-
-                    {/* Fijos - Naranja */}
-                    <button onClick={() => setActiveTab('presupuesto')} className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all active:scale-95">
-                        <div className={`p-1.5 rounded-xl transition-all ${activeTab === 'presupuesto' ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-300/50 scale-110' : 'bg-orange-50 text-orange-500'}`}>
-                            <Target size={20} strokeWidth={2.5} />
-                        </div>
-                        <span className={`text-[10px] font-bold ${activeTab === 'presupuesto' ? 'text-orange-600' : 'text-orange-400'}`}>Fijos</span>
-                    </button>
-                </div>
-            </nav>
         </div>
     );
 }
