@@ -301,26 +301,70 @@ export default function App() {
 
     if (cargando) return <div className="h-screen flex flex-col gap-4 items-center justify-center font-sans text-gray-500 font-bold animate-pulse"><Cloud size={40} className="text-blue-400" />Cargando...</div>;
 
+    // Fecha formateada
+    const fechaHoy = new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+
     return (
         <div className="flex flex-col h-screen bg-gray-50 w-full max-w-2xl mx-auto md:shadow-2xl overflow-hidden font-sans">
             {mostrarModalMes && <ModalCierreMes plantillas={plantillasParaProcesar} onProcesar={procesarMes} onCerrar={() => setMostrarModalMes(false)} formatCurrency={formatCurrency} />}
 
-            <div className="bg-white px-4 py-3 shadow-sm z-20 flex justify-between items-center sticky top-0 border-b">
-                <div>
-                    <div className="flex items-center gap-2"><h1 className="font-black text-gray-800 text-xl">Hola, <span className="text-blue-600 capitalize">{usuario}</span></h1><button onClick={handleLogout} className="text-gray-300 hover:text-red-400"><LogOut size={14} /></button></div>
-                    <div className="relative inline-flex items-center mt-1"><Calendar size={12} className="text-gray-400 mr-1" /><select value={periodo} onChange={(e) => setPeriodo(e.target.value)} className="appearance-none bg-transparent text-sm font-bold text-gray-500 outline-none cursor-pointer pr-4">{['Mensual', 'Quincenal', 'Semanal'].map(p => <option key={p} value={p}>{p}</option>)}</select><ChevronDown size={12} className="absolute right-0 text-gray-400" /></div>
+            {/* Header con fecha */}
+            <div className="bg-white px-4 py-3 shadow-sm z-20 sticky top-0 border-b">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h1 className="font-black text-gray-800 text-xl">Hola, <span className="text-blue-600 capitalize">{usuario}</span></h1>
+                            <button onClick={handleLogout} className="text-gray-300 hover:text-red-400"><LogOut size={14} /></button>
+                        </div>
+                        <p className="text-xs text-gray-400 capitalize mt-0.5">📅 {fechaHoy}</p>
+                        <div className="relative inline-flex items-center mt-1">
+                            <Calendar size={12} className="text-gray-400 mr-1" />
+                            <select value={periodo} onChange={(e) => setPeriodo(e.target.value)} className="appearance-none bg-transparent text-sm font-bold text-gray-500 outline-none cursor-pointer pr-4">
+                                {['Mensual', 'Quincenal', 'Semanal'].map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                            <ChevronDown size={12} className="absolute right-0 text-gray-400" />
+                        </div>
+                    </div>
+                    <div className={`px-3 py-2 rounded-2xl flex items-center gap-1 shadow-sm border ${bolsa >= 0 ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
+                        <span className="text-sm font-bold opacity-70">$</span>
+                        <span className="text-lg font-black">{new Intl.NumberFormat('es-CO', { notation: "compact", maximumFractionDigits: 1 }).format(bolsa)}</span>
+                    </div>
                 </div>
-                <div className={`px-3 py-2 rounded-2xl flex items-center gap-1 shadow-sm border ${bolsa >= 0 ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}><span className="text-sm font-bold opacity-70">$</span><span className="text-lg font-black">{new Intl.NumberFormat('es-CO', { notation: "compact", maximumFractionDigits: 1 }).format(bolsa)}</span></div>
             </div>
 
+            {/* Navegación con clases estáticas */}
             <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xl rounded-3xl border py-3 px-4 shadow-2xl z-50 max-w-md w-[calc(100%-2rem)]">
                 <div className="flex justify-around items-end w-full">
-                    {[{ tab: 'resumen', icon: Brain, label: 'Resumen', c: 'blue' }, { tab: 'ingresos', icon: TrendingUp, label: 'Ingreso', c: 'green' }, { tab: 'gastos', icon: TrendingDown, label: 'Gasto', c: 'red' }, { tab: 'metas', icon: Trophy, label: 'Ahorro', c: 'cyan' }, { tab: 'inversiones', icon: Rocket, label: 'Invest', c: 'indigo' }, { tab: 'presupuesto', icon: Target, label: 'Fijos', c: 'orange' }].map(({ tab, icon: I, label, c }) => (
-                        <button key={tab} onClick={() => setActiveTab(tab)} className={`flex flex-col items-center gap-1 py-1 px-2 transition-all duration-300 ${activeTab === tab ? '-translate-y-2' : ''}`}>
-                            <div className={`rounded-xl transition-all duration-300 ${activeTab === tab ? `p-3 bg-gradient-to-br from-${c}-400 to-${c}-600 text-white shadow-xl scale-125 ring-4 ring-${c}-200` : `p-2 bg-${c}-100 text-${c}-600`}`}><I size={activeTab === tab ? 20 : 16} strokeWidth={2.5} /></div>
-                            <span className={`font-bold transition-all ${activeTab === tab ? `text-[10px] text-${c}-700` : `text-[8px] text-${c}-500`}`}>{label}</span>
-                        </button>
-                    ))}
+                    {/* Resumen */}
+                    <button onClick={() => setActiveTab('resumen')} className={`flex flex-col items-center gap-1 py-1 px-2 transition-all duration-300 ${activeTab === 'resumen' ? '-translate-y-2' : ''}`}>
+                        <div className={`rounded-xl transition-all duration-300 ${activeTab === 'resumen' ? 'p-3 bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-xl scale-125 ring-4 ring-blue-200' : 'p-2 bg-blue-100 text-blue-600'}`}><Brain size={activeTab === 'resumen' ? 20 : 16} strokeWidth={2.5} /></div>
+                        <span className={`font-bold transition-all ${activeTab === 'resumen' ? 'text-[10px] text-blue-700' : 'text-[8px] text-blue-500'}`}>Resumen</span>
+                    </button>
+                    {/* Ingreso */}
+                    <button onClick={() => setActiveTab('ingresos')} className={`flex flex-col items-center gap-1 py-1 px-2 transition-all duration-300 ${activeTab === 'ingresos' ? '-translate-y-2' : ''}`}>
+                        <div className={`rounded-xl transition-all duration-300 ${activeTab === 'ingresos' ? 'p-3 bg-gradient-to-br from-green-400 to-green-600 text-white shadow-xl scale-125 ring-4 ring-green-200' : 'p-2 bg-green-100 text-green-600'}`}><TrendingUp size={activeTab === 'ingresos' ? 20 : 16} strokeWidth={2.5} /></div>
+                        <span className={`font-bold transition-all ${activeTab === 'ingresos' ? 'text-[10px] text-green-700' : 'text-[8px] text-green-500'}`}>Ingreso</span>
+                    </button>
+                    {/* Gasto */}
+                    <button onClick={() => setActiveTab('gastos')} className={`flex flex-col items-center gap-1 py-1 px-2 transition-all duration-300 ${activeTab === 'gastos' ? '-translate-y-2' : ''}`}>
+                        <div className={`rounded-xl transition-all duration-300 ${activeTab === 'gastos' ? 'p-3 bg-gradient-to-br from-red-400 to-red-600 text-white shadow-xl scale-125 ring-4 ring-red-200' : 'p-2 bg-red-100 text-red-600'}`}><TrendingDown size={activeTab === 'gastos' ? 20 : 16} strokeWidth={2.5} /></div>
+                        <span className={`font-bold transition-all ${activeTab === 'gastos' ? 'text-[10px] text-red-700' : 'text-[8px] text-red-500'}`}>Gasto</span>
+                    </button>
+                    {/* Ahorro */}
+                    <button onClick={() => setActiveTab('metas')} className={`flex flex-col items-center gap-1 py-1 px-2 transition-all duration-300 ${activeTab === 'metas' ? '-translate-y-2' : ''}`}>
+                        <div className={`rounded-xl transition-all duration-300 ${activeTab === 'metas' ? 'p-3 bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-xl scale-125 ring-4 ring-cyan-200' : 'p-2 bg-cyan-100 text-cyan-600'}`}><Trophy size={activeTab === 'metas' ? 20 : 16} strokeWidth={2.5} /></div>
+                        <span className={`font-bold transition-all ${activeTab === 'metas' ? 'text-[10px] text-cyan-700' : 'text-[8px] text-cyan-500'}`}>Ahorro</span>
+                    </button>
+                    {/* Invest */}
+                    <button onClick={() => setActiveTab('inversiones')} className={`flex flex-col items-center gap-1 py-1 px-2 transition-all duration-300 ${activeTab === 'inversiones' ? '-translate-y-2' : ''}`}>
+                        <div className={`rounded-xl transition-all duration-300 ${activeTab === 'inversiones' ? 'p-3 bg-gradient-to-br from-indigo-400 to-indigo-600 text-white shadow-xl scale-125 ring-4 ring-indigo-200' : 'p-2 bg-indigo-100 text-indigo-600'}`}><Rocket size={activeTab === 'inversiones' ? 20 : 16} strokeWidth={2.5} /></div>
+                        <span className={`font-bold transition-all ${activeTab === 'inversiones' ? 'text-[10px] text-indigo-700' : 'text-[8px] text-indigo-500'}`}>Invest</span>
+                    </button>
+                    {/* Fijos */}
+                    <button onClick={() => setActiveTab('presupuesto')} className={`flex flex-col items-center gap-1 py-1 px-2 transition-all duration-300 ${activeTab === 'presupuesto' ? '-translate-y-2' : ''}`}>
+                        <div className={`rounded-xl transition-all duration-300 ${activeTab === 'presupuesto' ? 'p-3 bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-xl scale-125 ring-4 ring-orange-200' : 'p-2 bg-orange-100 text-orange-600'}`}><Target size={activeTab === 'presupuesto' ? 20 : 16} strokeWidth={2.5} /></div>
+                        <span className={`font-bold transition-all ${activeTab === 'presupuesto' ? 'text-[10px] text-orange-700' : 'text-[8px] text-orange-500'}`}>Fijos</span>
+                    </button>
                 </div>
             </nav>
 
