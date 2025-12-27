@@ -18,21 +18,23 @@ import {
     Save,
     X,
     Rocket,
-    Percent
+    Percent,
+    Cloud,
+    LogOut
 } from 'lucide-react';
 
 // --- COMPONENTE EXTRAÍDO: ListSection ---
-// Definido FUERA de App para evitar re-creación en cada render (fix del bug de input)
 const ListSection = ({
     title, items, setter, color, bgColor, icon: Icon, placeholder, type = 'normal',
-    periodo, totalAhorrado, editingId, setEditingId, newItem, setNewItem, formatCurrency
+    periodo, totalAhorrado, editingId, setEditingId, newItem, setNewItem, formatCurrency, onDataChange
 }) => {
 
     const handleSaveItem = () => {
         if (!newItem.concepto || !newItem.valor) return;
 
+        let updatedList;
         if (editingId) {
-            const updatedList = items.map(item => {
+            updatedList = items.map(item => {
                 if (item.id === editingId) {
                     if (type === 'meta') {
                         return { ...item, concepto: newItem.concepto, meta: parseInt(newItem.valor) };
@@ -44,20 +46,22 @@ const ListSection = ({
                 }
                 return item;
             });
-            setter(updatedList);
             setEditingId(null);
         } else {
             const baseItem = { id: Date.now(), concepto: newItem.concepto };
-
             if (type === 'meta') {
-                setter([...items, { ...baseItem, meta: parseInt(newItem.valor), ahorrado: 0 }]);
+                updatedList = [...items, { ...baseItem, meta: parseInt(newItem.valor), ahorrado: 0 }];
             } else if (type === 'inversion') {
-                setter([...items, { ...baseItem, valor: parseInt(newItem.valor), rendimiento: parseFloat(newItem.rendimiento || 0) }]);
+                updatedList = [...items, { ...baseItem, valor: parseInt(newItem.valor), rendimiento: parseFloat(newItem.rendimiento || 0) }];
             } else {
-                setter([...items, { ...baseItem, valor: parseInt(newItem.valor) }]);
+                updatedList = [...items, { ...baseItem, valor: parseInt(newItem.valor) }];
             }
         }
+
+        setter(updatedList);
         setNewItem({ concepto: '', valor: '', rendimiento: '' });
+        // Trigger para guardar en la nube
+        if (onDataChange) onDataChange();
     };
 
     const cancelEdit = () => {
@@ -67,7 +71,9 @@ const ListSection = ({
 
     const deleteItem = (id) => {
         if (editingId === id) cancelEdit();
-        setter(items.filter(i => i.id !== id));
+        const updatedList = items.filter(i => i.id !== id);
+        setter(updatedList);
+        if (onDataChange) onDataChange();
     };
 
     const startEdit = (item) => {
@@ -89,6 +95,7 @@ const ListSection = ({
             return m;
         });
         setter(nuevasMetas);
+        if (onDataChange) onDataChange();
     };
 
     return (
@@ -364,71 +371,93 @@ const SmartTotals = ({ periodo, bolsa, totalIngresos, totalGastos, totalPatrimon
 
 // --- COMPONENTE PRINCIPAL ---
 export default function App() {
+    // --- ESTADO DE USUARIO (NUBE) ---
+    const [usuario, setUsuario] = useState(localStorage.getItem('finanzas_usuario') || '');
+    const [inputUsuario, setInputUsuario] = useState('');
+    const [cargando, setCargando] = useState(false);
+
     const [activeTab, setActiveTab] = useState('resumen');
 
     // --- ESTADO DEL PERIODO (CICLO) ---
-    const [periodo, setPeriodo] = useState(() => {
-        return localStorage.getItem('finanzas_periodo') || 'Mensual';
-    });
+    const [periodo, setPeriodo] = useState('Mensual');
 
     // --- ESTADOS DE EDICIÓN ---
     const [editingId, setEditingId] = useState(null);
 
-    // --- DATOS ---
-    const [ingresos, setIngresos] = useState(() => {
-        const saved = localStorage.getItem('finanzas_ingresos');
-        return saved ? JSON.parse(saved) : [{ id: 1, concepto: 'Nómina', valor: 2500000 }];
-    });
-
-    const [gastos, setGastos] = useState(() => {
-        const saved = localStorage.getItem('finanzas_gastos');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, concepto: 'Pasajes', valor: 150000 },
-            { id: 2, concepto: 'Almuerzo', valor: 25000 },
-        ];
-    });
-
-    const [presupuesto, setPresupuesto] = useState(() => {
-        const saved = localStorage.getItem('finanzas_presupuesto');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, concepto: 'Arriendo', valor: 800000 },
-            { id: 2, concepto: 'Servicios', valor: 200000 },
-        ];
-    });
-
-    const [proyectado, setProyectado] = useState(() => {
-        const saved = localStorage.getItem('finanzas_proyectado');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, concepto: 'Salida Cine', valor: 60000 },
-        ];
-    });
-
-    const [metas, setMetas] = useState(() => {
-        const saved = localStorage.getItem('finanzas_metas');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, concepto: 'Fondo Emergencia', meta: 1000000, ahorrado: 200000 },
-        ];
-    });
-
-    // --- INVERSIONES ---
-    const [inversiones, setInversiones] = useState(() => {
-        const saved = localStorage.getItem('finanzas_inversiones');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, concepto: 'CDT Digital', valor: 500000, rendimiento: 12 },
-        ];
-    });
+    // --- DATOS (Inicializan vacíos hasta que cargue la nube) ---
+    const [ingresos, setIngresos] = useState([]);
+    const [gastos, setGastos] = useState([]);
+    const [presupuesto, setPresupuesto] = useState([]);
+    const [proyectado, setProyectado] = useState([]);
+    const [metas, setMetas] = useState([]);
+    const [inversiones, setInversiones] = useState([]);
 
     // Estado del formulario
     const [newItem, setNewItem] = useState({ concepto: '', valor: '', rendimiento: '' });
 
-    // --- PERSISTENCIA ---
-    useEffect(() => localStorage.setItem('finanzas_periodo', periodo), [periodo]);
-    useEffect(() => localStorage.setItem('finanzas_ingresos', JSON.stringify(ingresos)), [ingresos]);
-    useEffect(() => localStorage.setItem('finanzas_gastos', JSON.stringify(gastos)), [gastos]);
-    useEffect(() => localStorage.setItem('finanzas_presupuesto', JSON.stringify(presupuesto)), [presupuesto]);
-    useEffect(() => localStorage.setItem('finanzas_proyectado', JSON.stringify(proyectado)), [proyectado]);
-    useEffect(() => localStorage.setItem('finanzas_metas', JSON.stringify(metas)), [metas]);
-    useEffect(() => localStorage.setItem('finanzas_inversiones', JSON.stringify(inversiones)), [inversiones]);
+    // --- EFECTO: CARGAR DATOS AL INICIAR SESIÓN ---
+    useEffect(() => {
+        if (usuario) {
+            setCargando(true);
+            // Cargar datos del servidor simulado
+            fetch(`/api/load/${usuario}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        setIngresos(data.ingresos || []);
+                        setGastos(data.gastos || []);
+                        setPresupuesto(data.presupuesto || []);
+                        setProyectado(data.proyectado || []);
+                        setMetas(data.metas || []);
+                        setInversiones(data.inversiones || []);
+                        setPeriodo(data.periodo || 'Mensual');
+                    } else {
+                        // Usuario nuevo: cargar datos de ejemplo
+                        setIngresos([{ id: 1, concepto: 'Nómina', valor: 2500000 }]);
+                        setGastos([{ id: 1, concepto: 'Pasajes', valor: 150000 }]);
+                        setPresupuesto([{ id: 1, concepto: 'Arriendo', valor: 800000 }]);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error cargando nube", err);
+                    alert("Error conectando con el servidor");
+                })
+                .finally(() => setCargando(false));
+        }
+    }, [usuario]);
+
+    // --- FUNCIÓN: GUARDAR EN NUBE (Debounced o Manual) ---
+    const guardarEnNube = () => {
+        if (!usuario) return;
+        const data = { ingresos, gastos, presupuesto, proyectado, metas, inversiones, periodo };
+
+        // Simular guardado silencioso (sin alert intrusivo cada vez, solo log o indicador visual)
+        fetch(`/api/save/${usuario}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(res => res.json())
+            .then(res => {
+                console.log(res.message);
+            })
+            .catch(err => console.error("Error guardando", err));
+    };
+
+    // Auto-guardado: Cuando cambien los datos, guardar en el servidor
+    useEffect(() => {
+        if (usuario && !cargando) {
+            const timeoutId = setTimeout(() => {
+                guardarEnNube();
+            }, 1000); // Guardar 1 segundo después del último cambio
+            return () => clearTimeout(timeoutId);
+        }
+    }, [ingresos, gastos, presupuesto, proyectado, metas, inversiones, periodo]);
+
+    const handleLogout = () => {
+        setUsuario('');
+        localStorage.removeItem('finanzas_usuario');
+        setInputUsuario('');
+    };
 
     // --- CÁLCULOS ---
     const totalIngresos = ingresos.reduce((acc, curr) => acc + curr.valor, 0);
@@ -460,21 +489,66 @@ export default function App() {
         setEditingId,
         newItem,
         setNewItem,
-        formatCurrency
+        formatCurrency,
+        onDataChange: guardarEnNube // Callback para forzar guardado inmediato al borrar/editar
     };
 
+    // --- PANTALLA DE LOGIN (Si no hay usuario) ---
+    if (!usuario) {
+        return (
+            <div className="h-screen flex flex-col items-center justify-center bg-gray-50 p-6 font-sans">
+                <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
+                    <div className="bg-blue-100 p-4 rounded-full inline-block mb-4 text-blue-600">
+                        <Cloud size={48} />
+                    </div>
+                    <h1 className="text-3xl font-black text-gray-800 mb-2">Finanzas<span className="text-blue-600">App</span></h1>
+                    <p className="text-gray-500 mb-6 leading-relaxed">
+                        Ingresa un nombre para crear tu espacio personal en la nube.
+                    </p>
+                    <input
+                        type="text"
+                        placeholder="Ej: JuanPerez"
+                        className="w-full bg-gray-100 p-4 rounded-xl mb-4 text-center font-bold text-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                        value={inputUsuario}
+                        onChange={(e) => setInputUsuario(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && inputUsuario.trim() && (localStorage.setItem('finanzas_usuario', inputUsuario), setUsuario(inputUsuario))}
+                    />
+                    <button
+                        onClick={() => {
+                            if (inputUsuario.trim()) {
+                                localStorage.setItem('finanzas_usuario', inputUsuario);
+                                setUsuario(inputUsuario);
+                            }
+                        }}
+                        className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform"
+                    >
+                        Entrar
+                    </button>
+                    <p className="mt-4 text-xs text-gray-400">Tus datos se guardarán automáticamente.</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (cargando) return <div className="h-screen flex flex-col gap-4 items-center justify-center font-sans text-gray-500 font-bold animate-pulse"><Cloud size={40} className="text-blue-400" />Cargando tu nube...</div>;
+
+    // --- APP PRINCIPAL ---
     return (
         <div className="flex flex-col h-screen bg-gray-50 w-full max-w-2xl mx-auto md:shadow-2xl overflow-hidden font-sans">
             {/* Header */}
             <div className="bg-white px-3 sm:px-5 py-3 sm:py-4 shadow-sm z-20 flex justify-between items-center sticky top-0 border-b border-gray-100">
                 <div className="flex flex-col">
-                    <h1 className="font-black text-gray-800 text-xl sm:text-2xl tracking-tight leading-none mb-1">Finanzas<span className="text-blue-600">App</span></h1>
-                    <div className="relative inline-flex items-center group">
+                    <div className="flex items-center gap-2">
+                        <h1 className="font-black text-gray-800 text-xl sm:text-2xl tracking-tight leading-none">Hola, <span className="text-blue-600 capitalize">{usuario}</span></h1>
+                        <button onClick={handleLogout} className="text-gray-300 hover:text-red-400" title="Salir"><LogOut size={16} /></button>
+                    </div>
+
+                    <div className="relative inline-flex items-center group mt-1">
                         <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none text-gray-400"><Calendar size={14} /></div>
                         <select
                             value={periodo}
                             onChange={(e) => setPeriodo(e.target.value)}
-                            className="appearance-none bg-transparent pl-5 pr-6 py-1 text-sm font-bold text-gray-500 outline-none focus:text-blue-600 active:text-blue-600 transition-colors cursor-pointer"
+                            className="appearance-none bg-transparent pl-5 pr-6 py-0 text-sm font-bold text-gray-500 outline-none focus:text-blue-600 active:text-blue-600 transition-colors cursor-pointer"
                         >
                             <option value="Mensual">Mensual</option>
                             <option value="Quincenal">Quincenal</option>
